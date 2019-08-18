@@ -1,0 +1,67 @@
+{
+    "courses counter": 3,
+    "topics counter": 4,
+    "elements counter": 12,
+    "courses": {
+        "c-1": {
+            "name": "Hello World!",
+            "topics": {
+                "t-1": {
+                    "name": "Ciao",
+                    "elements": {
+                        "e-6": {
+                            "name": "Hello!",
+                            "type": "lesson",
+                            "creation date": "2019-05-24T23:15:35.435212"
+                        },
+                        "e-7": {
+                            "name": "Hello Again",
+                            "type": "lesson",
+                            "creation date": "2019-05-24T23:19:12.214612"
+                        },
+                        "e-8": {
+                            "name": "Hello For The Third Time",
+                            "type": "lesson",
+                            "creation date": "2019-05-24T23:19:35.038676"
+                        },
+                        "e-9": {
+                            "name": "Hi",
+                            "type": "lesson",
+                            "creation date": "2019-05-24T23:21:33.883832"
+                        }
+                    },
+                    "creation date": "2019-05-24T23:13:17.674540"
+                }
+            },
+            "creation date": "2019-05-24T23:09:58.101137"
+        },
+        "c-2": {
+            "name": "Hello World, but this one is mine",
+            "topics": {
+                "t-2": {
+                    "name": "You doing ok?",
+                    "elements": {
+                        "e-10": {
+                            "name": "I think you are",
+                            "type": "lesson",
+                            "creation date": "2019-05-24T23:30:29.271315"
+                        }
+                    },
+                    "creation date": "2019-05-24T23:30:24.424276"
+                },
+                "t-3": {
+                    "name": "Hello?",
+                    "elements": {
+                        "e-11": {
+                            "name": "Ciaoneeee",
+                            "type": "lesson",
+                            "creation date": "2019-05-25T11:16:43.503921"
+                        }
+                    },
+                    "creation date": "2019-05-25T08:21:41.097383"
+                }
+            },
+            "creation date": "2019-05-24T23:29:36.936242"
+        }
+    }
+}
