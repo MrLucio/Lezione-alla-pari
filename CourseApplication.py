@@ -105,11 +105,6 @@ class Api:
         return {"message": html_page}
 
     @staticmethod
-    def close_everything(*args):
-        print("gesu crosto")
-        sys.exit(0)
-
-    @staticmethod
     def _load_html_lesson_model():
         with urllib.request.urlopen("http://localhost:8080/html/lesson_model.html") as html_file:
             return html_file.read().decode("utf-8")
