@@ -19,13 +19,24 @@
 /* ContextMenu */
 
 .menu {
-    text-decoration: none;
-    list-style-type: none;
+    position: fixed;
     display: none;
+    z-index: 9999;
+    opacity: .5;
+    transition: opacity 10s;
+    background-color: white;
+    box-shadow: 5px 5px 30px #696969;
+}
+
+.menu ul {
+    text-decoration: none;
+    list-style: none;
+    margin: auto;
 }
 
 .menu-on {
     display: block;
+    opacity: 1;
 }
 
 /* Layout */

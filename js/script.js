@@ -1,5 +1,6 @@
-let selected_course
-let selected_topic
+let selected_course;
+let selected_topic;
+let menu;
 
 async function refreshCourses() {
     show('#loader');
@@ -18,8 +19,9 @@ async function refreshCourses() {
         button.id = course_id;
         course_name = await pywebview.api.get_course_attributes({
             "course_id": course_id
-        })
+        });
         button.innerHTML = course_name.message.name
+
         button.onclick = function () {
             refreshTopics(course_id, "rw")
         }
@@ -113,13 +115,15 @@ async function refreshElements(topic_id, course_id, mode) {
         button.className += " btn btn-lg btn-block waves-effect m-1 p-4";
         button.className += mode == "r" ? " btn-blue-grey" : " btn-indigo"
         button.id = element_id;
+
         element_properties = await pywebview.api.get_element_attributes({
             "element_id": element_id,
             "topic_id": topic_id,
             "course_id": course_id
         });
+
         button.innerHTML = element_properties.message.name;
-        button.onclick = async function (element_type) {
+        button.onclick = async function () {
             html_test = await pywebview.api.load_element_html({
                 "element_id": element_id,
                 "topic_id": topic_id,
@@ -154,9 +158,24 @@ function hide(id) {
     $(id).addClass("hide")
 }
 
+function addMenuListeners() {
+    $("#courses").bind("contextmenu", function (ev) {
+        ev.preventDefault();
+        $('.menu').css('top', ev.clientY - 20);
+        $('.menu').css('left', ev.clientX - 20);
+        $('.menu').addClass('menu-on');
+    });
+    $("#mod-course").click(function () {
+        toggleOverlay();
+        $('.menu').removeClass('menu-on');
+    })
+}
+
+
 $(window).on('load', function () {
 
     show('#loader');
+    // Polling System for ensuring Pywebview is loaded
     let pywebview_loaded = false;
     for (let i = 0; i < 20 && !pywebview_loaded; i++) {
         setTimeout(function () {
@@ -170,20 +189,21 @@ $(window).on('load', function () {
             }
         }, 100);
     }
+
+    addMenuListeners();
     hide('#loader');
 });
 
 $('#creation-modal').on('show.bs.modal', function (event) {
     var button = $(event.relatedTarget)
     var creation_type = button.data('type')
-    var modal = $(this)
     $("#modal-title").html("Create New " + creation_type)
     $("#modal-label").html(creation_type + " Name:")
     $("#modal-submit").html("Create New " + creation_type)
     $("#modal-data-type").val(creation_type)
 })
 
-$('#creation-modal').on('hide.bs.modal', function (event) {
+$('#creation-modal').on('hide.bs.modal', function () {
     $("#modal-name").val("");
 })
 
@@ -197,10 +217,11 @@ $("#modal-submit").click(async function () {
             case "Course":
                 params["course_name"] = input_text_val;
                 result = await pywebview.api.add_course(params);
-                if (result.trim().length > 0)
+                if (result.trim().length > 0) {
                     refreshCourses();
-                else
+                } else {
                     alert("Si è verificato un errore durante la creazione del corso")
+                }
                 $("#creation-modal").modal("toggle");
                 break;
 
@@ -208,10 +229,11 @@ $("#modal-submit").click(async function () {
                 params["topic_name"] = input_text_val;
                 params["course_id"] = selected_course;
                 result = await pywebview.api.add_topic(params);
-                if (result.trim().length > 0)
+                if (result.trim().length > 0) {
                     refreshTopics(selected_course, "rw");
-                else
-                    alert("Si è verificato un errore durante la creazione del topic")
+                } else {
+                    alert("Si è verificato un errore durante la creazione del topic");
+                }
                 $("#creation-modal").modal("toggle");
                 break;
 
@@ -221,10 +243,11 @@ $("#modal-submit").click(async function () {
                 params["topic_id"] = selected_topic;
                 params["course_id"] = selected_course;
                 result = await pywebview.api.add_element(params);
-                if (result.trim().length > 0)
+                if (result.trim().length > 0) {
                     refreshElements(selected_topic, selected_course, "rw");
-                else
-                    alert("Si è verificato un errore durante la creazione del topic")
+                } else {
+                    alert("Si è verificato un errore durante la creazione del topic");
+                }
                 $("#creation-modal").modal("toggle");
                 break;
 
