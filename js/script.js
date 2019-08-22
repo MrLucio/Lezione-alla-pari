@@ -161,9 +161,11 @@ function hide(id) {
 function addMenuListeners() {
     $("#courses").bind("contextmenu", function (ev) {
         ev.preventDefault();
-        $('.menu').css('top', ev.clientY - 20);
-        $('.menu').css('left', ev.clientX - 20);
-        $('.menu').addClass('menu-on');
+        if (ev.target.id != "courses") {
+            $('.menu').css('top', ev.clientY - 20);
+            $('.menu').css('left', ev.clientX - 20);
+            $('.menu').addClass('menu-on');
+        }
     });
     $("#mod-course").click(function () {
         toggleOverlay();
