@@ -132,7 +132,6 @@ async function refreshElements(topic_id, course_id, mode) {
             $("#overlay").html(html_test.message)
             toggleMain();
         };
-
         $("#elements").append(button);
     };
     hide('#loader');
@@ -159,17 +158,46 @@ function hide(id) {
 }
 
 function addMenuListeners() {
-    $("#courses").bind("contextmenu", function (ev) {
+    let selected;
+    $("#dynamic-list").bind("contextmenu", function (ev) {
         ev.preventDefault();
-        if (ev.target.id != "courses") {
+        if (["courses", "topics", "elements"].includes(ev.target.parentElement.id)) {
+            selected = ev.target.id;
             $('.menu').css('top', ev.clientY - 20);
             $('.menu').css('left', ev.clientX - 20);
             $('.menu').addClass('menu-on');
+            switch (ev.target.parentElement.id) {
+                case "courses":
+                    show("#menu-course");
+                    hide("#menu-topic");
+                    hide("#menu-element");
+                    break;
+                case "topics":
+                    hide("#menu-course");
+                    show("#menu-topic");
+                    hide("#menu-element");
+                    break;
+                case "elements":
+                    hide("#menu-course");
+                    hide("#menu-topic");
+                    show("#menu-element");
+                    break;
+            }
         }
     });
-    $("#mod-course").click(function () {
-        toggleOverlay();
+
+    $(document).mouseup(function (e) {
+        var menu = $(".menu");
+        if (!menu.is(e.target) && menu.has(e.target).length === 0) {
+            menu.removeClass('menu-on');
+        }
+    });
+
+    $("#mod-element").click(function () {
         $('.menu').removeClass('menu-on');
+        toggleOverlay();
+        alert(selected);
+        // TODO: Usare la variabile selected per modificare un corso
     })
 }
 

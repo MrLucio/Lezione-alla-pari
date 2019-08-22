@@ -27,10 +27,20 @@
     <div id="overlay" style="display:none"></div>
     <div id="loader"></div>
     <div class="menu">
-        <ul>
+        <ul id="menu-course">
             <li><a href="#" id="mod-course"> Modifica </a></li>
             <li><a href="#" id="mod-members"> Membri </a></li>
             <li><a href="#" id="del-course"> Elimina </a></li>
+        </ul>
+
+        <ul id="menu-topic">
+            <li><a href="#" id="mod-topic"> Topic Test </a></li>
+            <li><a href="#" id="del-topic"> Elimina </a></li>
+        </ul>
+
+        <ul id="menu-element">
+            <li><a href="#" id="mod-element"> Modifica </a></li>
+            <li><a href="#" id="del-element"> Elimina </a></li>
         </ul>
     </div>
 
@@ -49,7 +59,7 @@
                     data-target="#creation-modal" data-type="Element">+</button>
             </div>
         </div>
-        <div class="row">
+        <div class="row" id="dynamic-list">
             <div class="col-sm-4 text-center" id="courses">
             </div>
             <div class="col-sm-4 text-center" id="topics">
