@@ -69,6 +69,13 @@ class Api:
                                         args_dict["course_id"])
         return id
 
+    def edit_element(self, args_dict):
+        self.course_fs.edit_element(
+            args_dict["element_id"], args_dict["topic_id"], args_dict["course_id"],
+            args_dict["element_title"], args_dict["element_content"]
+        )
+        pass
+
     def remove_element(self, args_dict):
         self.course_fs.remove_element(args_dict["element_id"], args_dict["topic_id"], args_dict["course_id"])
 
@@ -91,20 +98,36 @@ class Api:
         return {"message": self.course_fs.get_element_attributes(args_dict["element_id"], args_dict["topic_id"],
                                                                  args_dict["course_id"])}
 
-    def load_element_html(self, cose):
-        element_html = self.course_fs.get_element_html(cose["element_id"], cose["topic_id"], cose["course_id"])
-        element_title = str(element_html.title.string)
-        element_content = element_html.content
+    def load_lesson_html(self, args_dict):
+        element_html = self.course_fs.get_element_html(args_dict["element_id"], args_dict["topic_id"], args_dict["course_id"])
+        element_title = str(element_html.title.string).strip()
+        element_content = ''.join([str(elem).strip() for elem in element_html.content.contents])
         webview.set_title(element_title)
 
-        lesson_model = self._load_html_lesson_model()
-        html_page = lesson_model.format(
-            title=element_title, content=element_content
-        ).replace("\r", "").replace("\n", "")
+        edit = args_dict.pop('edit', False)
+
+        if edit:
+            lesson_editor_model = self._load_html_editor_model()
+            html_page = lesson_editor_model.format(
+                title=element_title, content=element_content
+            )
+        else:
+            lesson_model = self._load_html_lesson_model()
+            html_page = lesson_model.format(
+                title=element_title, content=element_content
+            )
 
         return {"message": html_page}
 
     @staticmethod
     def _load_html_lesson_model():
         with urllib.request.urlopen("http://localhost:8080/html/lesson_model.html") as html_file:
-            return html_file.read().decode("utf-8")
+            return html_file.read().decode("utf-8").replace('\n', '').replace('\r', '')
+
+    @staticmethod
+    def _load_html_editor_model():
+        with urllib.request.urlopen("http://localhost:8080/html/lesson_editor.html") as html_file:
+            return html_file.read().decode("utf-8").replace('\n', '').replace('\r', '')
+
+    def set_title(self, args_dict):
+        webview.set_title(args_dict['title'])

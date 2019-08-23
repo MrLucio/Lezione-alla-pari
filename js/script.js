@@ -1,5 +1,6 @@
 let selected_course;
 let selected_topic;
+let selected;
 let menu;
 
 async function refreshCourses() {
@@ -124,17 +125,34 @@ async function refreshElements(topic_id, course_id, mode) {
 
         button.innerHTML = element_properties.message.name;
         button.onclick = async function () {
-            html_test = await pywebview.api.load_element_html({
+            show('#loader');
+            $("#message").html("");
+            html_test = await pywebview.api.load_lesson_html({
                 "element_id": element_id,
                 "topic_id": topic_id,
                 "course_id": course_id
             })
-            $("#overlay").html(html_test.message)
+            hide('#loader');
+            $("#message").html(html_test.message)
             toggleMain();
         };
         $("#elements").append(button);
     };
     hide('#loader');
+}
+
+async function editElement(){
+    show('#loader');
+    await pywebview.api.edit_element({
+        "element_id": selected,
+        "topic_id": selected_topic,
+        "course_id": selected_course,
+        "element_title": $("#title-editor").html(),
+        "element_content": $(".ql-editor").html()
+    })
+    toggleOverlay()
+    hide('#loader');
+    alert('Elemento salvato!!')
 }
 
 function toggleMain() {
@@ -143,7 +161,10 @@ function toggleMain() {
     });
 }
 
-function toggleOverlay() {
+function toggleOverlay(resetTitle=true) {
+    if(resetTitle)
+        pywebview.api.set_title({title: 'Lezioni alla pari'})
+
     $("#overlay").fadeToggle("slow", function () {
         $("#main").fadeToggle("fast");
     });
@@ -158,11 +179,10 @@ function hide(id) {
 }
 
 function addMenuListeners() {
-    let selected;
     $("#dynamic-list").bind("contextmenu", function (ev) {
         ev.preventDefault();
         if (["courses", "topics", "elements"].includes(ev.target.parentElement.id)) {
-            selected = ev.target.id;
+            selected = ev.target.id; // TODO Variabile globale
             $('.menu').css('top', ev.clientY - 20);
             $('.menu').css('left', ev.clientX - 20);
             $('.menu').addClass('menu-on');
@@ -193,10 +213,19 @@ function addMenuListeners() {
         }
     });
 
-    $("#mod-element").click(function () {
+    $("#mod-element").click(async function () {
         $('.menu').removeClass('menu-on');
         toggleOverlay();
-        alert(selected);
+        show('#loader');
+        $("#message").html("");
+        selected_element_html = await pywebview.api.load_lesson_html({
+            "element_id": selected,
+            "topic_id": selected_topic,
+            "course_id": selected_course,
+            "edit": true
+        })
+        hide('#loader');
+        $("#message").html(selected_element_html.message)
         // TODO: Usare la variabile selected per modificare un corso
     })
 }

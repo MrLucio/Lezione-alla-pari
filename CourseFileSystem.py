@@ -7,7 +7,7 @@ import os
 class CourseFileSystem:
 
     DEFAULT_COURSES_PATH = os.path.join("data", "Courses")
-    DEFAULT_HTML = "<title>{title}</title><content></content>"
+    DEFAULT_HTML = "<title>{title}</title><content>{content}</content>"
 
     def __init__(self):
 
@@ -211,7 +211,7 @@ class CourseFileSystem:
             return Error("io_error", "Errore nella creazione dell'elemento")
 
         # Inserisco il titolo all'interno dell'html del nuovo elemento
-        element_html = CourseFileSystem.DEFAULT_HTML.format(title=element_name)
+        element_html = CourseFileSystem.DEFAULT_HTML.format(title=element_name, content='')
         # Creo il parser html del nuovo elemento
         element_html_parser = BeautifulSoup(element_html, "html.parser")
 
@@ -224,6 +224,24 @@ class CourseFileSystem:
             return Error("Errore durante la creazione dell'elemento")
 
         return new_element_id
+
+    def edit_element(self, element_id, topic_id, course_id, element_title, element_content):
+
+        # "Assemblo" la path dell'elemento
+        element_dir = os.path.join(
+            CourseFileSystem.DEFAULT_COURSES_PATH, course_id, topic_id, element_id
+        )
+
+        # Inserisco il titolo all'interno dell'html dell'elemento
+        element_html = CourseFileSystem.DEFAULT_HTML.format(title=element_title, content=element_content)
+        # Creo il parser html dell' elemento
+        element_html_parser = BeautifulSoup(element_html, "html.parser")
+
+        # Creo il file "index.html" dell'elemento sul FileSystem e inserisco i vari tag
+        with open(os.path.join(element_dir, "index.html"), "w") as html_file_object:
+            html_file_object.write(element_html_parser.prettify())
+
+        return element_id
 
     def remove_element(self, element_id, topic_id, course_id):
 
@@ -278,9 +296,13 @@ class CourseFileSystem:
         try:
             # Tento di aprire l'elemento e di leggerne il contenuto
             with open(os.path.join(element_dir, "index.html")) as element_object:
-                element_html = element_object.read()
+                element_html = element_object.read().strip()
         except:
             return Error("Errore nella lettura dell'elemento")
+
+        import re
+
+        print(re.sub(r'\n\s*\n', r'\n\n', element_html.strip(), flags=re.M))
 
         # Genero il parser che mi permetterà di accedere ai contenuti html dell'elemento con facilità
         element_html_parser = BeautifulSoup(element_html, "html.parser")

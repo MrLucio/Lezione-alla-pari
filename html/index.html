@@ -10,12 +10,12 @@
     <link href="http://localhost:8080/css/bootstrap.min.css" rel="stylesheet">
     <!-- Material Design Bootstrap -->
     <link href="http://localhost:8080/css/mdb.min.css" rel="stylesheet">
-    <!-- Quill Snow Theme -->
-    <link rel="stylesheet" href="http://localhost:8080/css/quill.snow.css">
-    <!-- Quill Bubble Theme-->
-    <link href="http://localhost:8080/css/quill.bubble.css" rel="stylesheet">
     <!-- Quill Core CSS-->
     <link href="http://localhost:8080/css/quill.core.css" rel="stylesheet">
+    <!-- Quill Snow Theme -->
+    <link href="http://localhost:8080/css/quill.snow.css" rel="stylesheet">
+    <!-- Quill Bubble Theme-->
+    <link href="http://localhost:8080/css/quill.bubble.css" rel="stylesheet">
     <!-- Custom CSS-->
     <link href="http://localhost:8080/css/style.css" rel="stylesheet">
 
@@ -24,7 +24,11 @@
 </head>
 
 <body>
-    <div id="overlay" style="display:none"></div>
+    <div id="overlay" style="display:none">
+        <div id="message">
+            <div id="editor-container"></div>
+        </div>
+    </div>
     <div id="loader"></div>
     <div class="menu">
         <ul id="menu-course">
@@ -108,10 +112,10 @@
     <script type="text/javascript" src="http://localhost:8080/js/bootstrap.min.js"></script>
     <!-- MDB core JavaScript -->
     <script type="text/javascript" src="http://localhost:8080/js/mdb.min.js"></script>
-    <!-- Quill JS -->
-    <script type="text/javascript" src="http://localhost:8080/js/quill.min.js"></script>
     <!-- Quill Core JS-->
     <script type="text/javascript" src="http://localhost:8080/js/quill.core.js"></script>
+    <!-- Quill JS -->
+    <script type="text/javascript" src="http://localhost:8080/js/quill.min.js"></script>
     <!-- Custom JS -->
     <script type="text/javascript" src="http://localhost:8080/js/script.js" defer></script>
 
