@@ -34,17 +34,26 @@
         <ul id="menu-course">
             <li><a href="#" id="mod-course"> Modifica </a></li>
             <li><a href="#" id="mod-members"> Membri </a></li>
-            <li><a href="#" id="del-course"> Elimina </a></li>
+            <li><a href="#" id="del-course" data-toggle="modal" data-target="#confirm-modal" data-type="del-course">
+                    Elimina
+                </a>
+            </li>
         </ul>
 
         <ul id="menu-topic">
             <li><a href="#" id="mod-topic"> Topic Test </a></li>
-            <li><a href="#" id="del-topic"> Elimina </a></li>
+            <li><a href="#" id="del-topic" data-toggle="modal" data-target="#confirm-modal" data-type="del-topic">
+                    Elimina
+                </a>
+            </li>
         </ul>
 
         <ul id="menu-element">
             <li><a href="#" id="mod-element"> Modifica </a></li>
-            <li><a href="#" id="del-element"> Elimina </a></li>
+            <li><a href="#" id="del-element" data-toggle="modal" data-target="#confirm-modal" data-type="del-element">
+                    Elimina
+                </a>
+            </li>
         </ul>
     </div>
 
@@ -100,6 +109,27 @@
                     <button type="button" class="btn btn-primary" id="modal-submit">Create</button>
                 </div>
 
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="confirm-modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirm-title">Are you sure?</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="confirm-text">
+                    All changes are final, and any lost content cannot be restored.
+                </div>
+                <input type="hidden" id="confirm-type">
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="confirm-submit">Confirm</button>
+                </div>
             </div>
         </div>
     </div>

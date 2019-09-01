@@ -1,5 +1,6 @@
 let selected_course;
 let selected_topic;
+let coursesdict;
 let selected;
 let menu;
 
@@ -141,7 +142,7 @@ async function refreshElements(topic_id, course_id, mode) {
     hide('#loader');
 }
 
-async function editElement(){
+async function editElement() {
     show('#loader');
     await pywebview.api.edit_element({
         "element_id": selected,
@@ -161,9 +162,11 @@ function toggleMain() {
     });
 }
 
-function toggleOverlay(resetTitle=true) {
-    if(resetTitle)
-        pywebview.api.set_title({title: 'Lezioni alla pari'})
+function toggleOverlay(resetTitle = true) {
+    if (resetTitle)
+        pywebview.api.set_title({
+            title: 'Lezioni alla pari'
+        })
 
     $("#overlay").fadeToggle("slow", function () {
         $("#main").fadeToggle("fast");
@@ -181,35 +184,37 @@ function hide(id) {
 function addMenuListeners() {
     $("#dynamic-list").bind("contextmenu", function (ev) {
         ev.preventDefault();
-        if (["courses", "topics", "elements"].includes(ev.target.parentElement.id)) {
-            selected = ev.target.id; // TODO Variabile globale
-            $('.menu').css('top', ev.clientY - 20);
-            $('.menu').css('left', ev.clientX - 20);
-            $('.menu').addClass('menu-on');
-            switch (ev.target.parentElement.id) {
-                case "courses":
-                    show("#menu-course");
-                    hide("#menu-topic");
-                    hide("#menu-element");
-                    break;
-                case "topics":
-                    hide("#menu-course");
-                    show("#menu-topic");
-                    hide("#menu-element");
-                    break;
-                case "elements":
-                    hide("#menu-course");
-                    hide("#menu-topic");
-                    show("#menu-element");
-                    break;
-            }
+
+        if (!["courses", "topics", "elements"].includes(ev.target.parentElement.id)) return;
+        if (ev.target.parentElement.id == "courses" && coursesdict.message["r"].includes(ev.target.id)) return;
+        if (ev.target.parentElement.id != "courses" && coursesdict.message["r"].includes(selected_course)) return;
+
+        selected = ev.target.id; // TODO Variabile globale
+        $('.menu').css('top', ev.clientY - 20);
+        $('.menu').css('left', ev.clientX - 20);
+        $('.menu').addClass('menu-on');
+        switch (ev.target.parentElement.id) {
+            case "courses":
+                show("#menu-course");
+                hide("#menu-topic");
+                hide("#menu-element");
+                break;
+            case "topics":
+                hide("#menu-course");
+                show("#menu-topic");
+                hide("#menu-element");
+                break;
+            case "elements":
+                hide("#menu-course");
+                hide("#menu-topic");
+                show("#menu-element");
+                break;
         }
     });
 
     $(document).mouseup(function (e) {
-        var menu = $(".menu");
-        if (!menu.is(e.target) && menu.has(e.target).length === 0) {
-            menu.removeClass('menu-on');
+        if (!$(".menu").is(e.target) && $(".menu").has(e.target).length === 0) {
+            $(".menu").removeClass('menu-on');
         }
     });
 
@@ -227,6 +232,18 @@ function addMenuListeners() {
         hide('#loader');
         $("#message").html(selected_element_html.message)
         // TODO: Usare la variabile selected per modificare un corso
+    });
+
+    $("#del-course").click(function () {
+        $("#confirm-type").val("del-course");
+    })
+
+    $("#del-topic").click(function () {
+        $("#confirm-type").val("del-topic");
+    })
+
+    $("#del-element").click(function () {
+        $("#confirm-type").val("del-element");
     })
 }
 
@@ -252,6 +269,8 @@ $(window).on('load', function () {
     addMenuListeners();
     hide('#loader');
 });
+
+// Functions for creation modal
 
 $('#creation-modal').on('show.bs.modal', function (event) {
     var button = $(event.relatedTarget)
@@ -314,4 +333,52 @@ $("#modal-submit").click(async function () {
                 alert("Coming soon!")
         }
     }
+});
+
+// Functions for confirmation modal
+
+$('#confirm.modal').on('show.bs.modal', function (event) {
+    $("#modal-data-type").val(button.data('type'))
 })
+
+$("#confirm-submit").click(async function () {
+    let params = {};
+    let result;
+    switch ($("#confirm-type").val()) {
+        case "del-course":
+            result = await pywebview.api.remove_course(selected);
+            if (result.trim().length > 0) {
+                refreshCourses();
+                $("#confirm-modal").modal("toggle");
+            } else {
+                alert("Si è verificato un errore durante l'eliminazione del corso");
+            }
+            break;
+        case "del-topic":
+            params["course_id"] = selected_course;
+            params["topic_id"] = selected;
+            result = await pywebview.api.remove_topic(params);
+            if (result.trim().length > 0) {
+                refreshTopics(selected_course, "rw");
+                $("#confirm-modal").modal("toggle");
+            } else {
+                alert("Si è verificato un errore durante l'eliminazione del topic");
+            }
+            break;
+        case "del-element":
+            params["course_id"] = selected_course;
+            params["topic_id"] = selected_topic;
+            params["element_id"] = selected;
+            result = await pywebview.api.remove_element(params);
+            if (result.trim().length > 0) {
+                refreshElements(selected_topic, selected_course, "rw");
+                $("#confirm-modal").modal("toggle");
+            } else {
+                alert("Si è verificato un errore durante l'eliminazione del topic");
+            }
+            break;
+        default:
+            alert("Wait, this wasn't supposed to happen!");
+            break;
+    }
+});

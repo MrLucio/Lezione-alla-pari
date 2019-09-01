@@ -56,6 +56,7 @@ class Api:
     def remove_course(self, course_id):
         self.course_fs.remove_course(course_id)
         self.permission_mgr.remove_course(course_id)
+        return course_id
 
     def add_topic(self, args_dict):
         id = self.course_fs.add_topic(args_dict["topic_name"], args_dict["course_id"])
@@ -63,6 +64,7 @@ class Api:
 
     def remove_topic(self, args_dict):
         self.course_fs.remove_topic(args_dict["topic_id"], args_dict["course_id"])
+        return args_dict["topic_id"]
 
     def add_element(self, args_dict):
         id = self.course_fs.add_element(args_dict["element_name"], args_dict["element_type"], args_dict["topic_id"],
@@ -78,6 +80,7 @@ class Api:
 
     def remove_element(self, args_dict):
         self.course_fs.remove_element(args_dict["element_id"], args_dict["topic_id"], args_dict["course_id"])
+        return args_dict["element_id"]
 
     def list_courses(self, arg):
         return {"message": self.permission_mgr.get_user_permissions(self._logged_user)}
