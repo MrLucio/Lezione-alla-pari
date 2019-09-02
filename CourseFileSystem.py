@@ -105,12 +105,6 @@ class CourseFileSystem:
         :returns: True se l'operazione è andata a buon fine oppure errore
         :rtype: bool o Error"""
 
-        try:
-            # Tento di rimuove il corso dal FileSystem
-            shutil.rmtree(os.path.join(CourseFileSystem.DEFAULT_COURSES_PATH, course_id))
-        except:
-            return Error("Errore durante la rimozione del corso")
-
         # Rimuovo il corso all'interno del file descrittore
         if not self.descriptor.remove_course(course_id):
             return Error("Errore durante la rimozione del corso")
@@ -166,12 +160,6 @@ class CourseFileSystem:
         topic_dir = os.path.join(
             CourseFileSystem.DEFAULT_COURSES_PATH, course_id, topic_id
         )
-
-        try:
-            # Tento di rimuove il topic dal FileSystem
-            shutil.rmtree(topic_dir)
-        except:
-            return Error("io_error")
 
         # Tento di rimuove il topic dal file descrittore
         if not self.descriptor.remove_topic(topic_id, course_id):
@@ -261,12 +249,6 @@ class CourseFileSystem:
         element_dir = os.path.join(
             CourseFileSystem.DEFAULT_COURSES_PATH, course_id, topic_id, element_id
         )
-
-        try:
-            # Tento di rimuove l'elemento dal FileSystem
-            shutil.rmtree(element_dir)
-        except:
-            return Error("Errore durante la cancellazione dell'elemento")
 
         # Tento di rimuovere l'elemento dal file descrittore
         if not self.descriptor.remove_element(element_id, topic_id, course_id):

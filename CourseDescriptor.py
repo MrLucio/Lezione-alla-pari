@@ -55,6 +55,13 @@ class CourseDescriptor():
 
         return False
 
+    def filter_deleted(self, unfiltered_dict):
+        filtered_result = {}
+        for key, value in unfiltered_dict.items():
+            if not value["delete date"]:
+                filtered_result[key] = value
+        return filtered_result
+
     def get_new_course_id(self):
 
         """Funzione che genera un id univoco per un corso
@@ -119,7 +126,9 @@ class CourseDescriptor():
         # Recupero il contenuto del file descrittore
         descriptor_data = self._read_descriptor_data()
 
-        return list(descriptor_data["courses"].keys())
+        filtered_data = self.filter_deleted(descriptor_data["courses"])
+
+        return list(filtered_data.keys())
 
     def get_topics_list(self, course_id):
 
@@ -134,7 +143,9 @@ class CourseDescriptor():
         # Recupero il contenuto del file descrittore
         descriptor_data = self._read_descriptor_data()
 
-        return list(descriptor_data["courses"][course_id]["topics"].keys())
+        filtered_data = self.filter_deleted(descriptor_data["courses"][course_id]["topics"])
+
+        return list(filtered_data.keys())
 
     def get_elements_list(self, topic_id, course_id):
 
@@ -152,7 +163,11 @@ class CourseDescriptor():
         # Recupero il contenuto del file descrittore
         descriptor_data = self._read_descriptor_data()
 
-        return list(descriptor_data["courses"][course_id]["topics"][topic_id]["elements"].keys())
+        filtered_data = self.filter_deleted(
+            descriptor_data["courses"][course_id]["topics"][topic_id]["elements"]
+        )
+
+        return list(filtered_data.keys())
 
     def get_course_attributes(self, course_id):
 
@@ -222,7 +237,9 @@ class CourseDescriptor():
 
         # Creo la entry del nuovo corso
         new_course = {
-            "name": course_name, "topics": {}, "creation date": datetime.now().isoformat()
+            "name": course_name, "topics": {},
+            "creation date": datetime.now().isoformat(),
+            "delete date": None
         }
         descriptor_data["courses"][course_id] = new_course
 
@@ -249,7 +266,7 @@ class CourseDescriptor():
 
         # Recupero la lista dei corsi dal file descrittore e cancello la entry
         courses_list = descriptor_data["courses"]
-        del courses_list[course_id]
+        courses_list[course_id]["delete date"] = datetime.now().isoformat()
 
         # Aggiorno il file descrittore
         self._write_descriptor_data(descriptor_data)
@@ -278,7 +295,9 @@ class CourseDescriptor():
 
         # Creo la entry del nuovo topic
         new_topic = {
-            "name": topic_name, "elements": {}, "creation date": datetime.now().isoformat()
+            "name": topic_name, "elements": {},
+            "creation date": datetime.now().isoformat(),
+            "delete date": None
         }
         descriptor_data["courses"][course_id]["topics"][topic_id] = new_topic
 
@@ -307,7 +326,7 @@ class CourseDescriptor():
 
         # Recupero la lista dei topic dal file descrittore e cancello la entry
         topics_list = descriptor_data["courses"][course_id]["topics"]
-        del topics_list[topic_id]
+        topics_list[topic_id]["delete date"] = datetime.now().isoformat()
 
         # Aggiorno il file descrittore
         self._write_descriptor_data(descriptor_data)
@@ -343,7 +362,12 @@ class CourseDescriptor():
         descriptor_data = self._read_descriptor_data()
 
         # Creo la entry del nuovo elemento
-        new_element = {"name": element_name, "type": element_type, "creation date": datetime.now().isoformat()}
+        new_element = {
+            "name": element_name, "type": element_type,
+            "creation date": datetime.now().isoformat(),
+            "modify date": datetime.now().isoformat(),
+            "delete date": None
+        }
         descriptor_data["courses"][course_id]["topics"][topic_id]["elements"][element_id] = new_element
 
         # Aggiorno il file descrittore
@@ -373,7 +397,7 @@ class CourseDescriptor():
 
         # Recupero la lista degli elementi dal file descrittore e cancello la entry
         elements_list = descriptor_data["courses"][course_id]["topics"][topic_id]["elements"]
-        del elements_list[element_id]
+        elements_list[element_id]["delete date"] = datetime.now().isoformat()
 
         # Aggiorno il file descrittore
         self._write_descriptor_data(descriptor_data)
