@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 from Error import Error
 
 import os
+import re
 import webview
 import threading
 import http.server
@@ -59,11 +60,13 @@ class Api:
         return course_id
 
     def add_topic(self, args_dict):
-        id = self.course_fs.add_topic(args_dict["topic_name"], args_dict["course_id"])
+        id = self.course_fs.add_topic(
+            args_dict["topic_name"], args_dict["course_id"])
         return id
 
     def remove_topic(self, args_dict):
-        self.course_fs.remove_topic(args_dict["topic_id"], args_dict["course_id"])
+        self.course_fs.remove_topic(
+            args_dict["topic_id"], args_dict["course_id"])
         return args_dict["topic_id"]
 
     def add_element(self, args_dict):
@@ -74,12 +77,13 @@ class Api:
     def edit_element(self, args_dict):
         self.course_fs.edit_element(
             args_dict["element_id"], args_dict["topic_id"], args_dict["course_id"],
-            args_dict["element_title"], args_dict["element_content"]
+            args_dict["element_html"]
         )
         pass
 
     def remove_element(self, args_dict):
-        self.course_fs.remove_element(args_dict["element_id"], args_dict["topic_id"], args_dict["course_id"])
+        self.course_fs.remove_element(
+            args_dict["element_id"], args_dict["topic_id"], args_dict["course_id"])
         return args_dict["element_id"]
 
     def list_courses(self, arg):
@@ -102,35 +106,24 @@ class Api:
                                                                  args_dict["course_id"])}
 
     def load_lesson_html(self, args_dict):
-        element_html = self.course_fs.get_element_html(args_dict["element_id"], args_dict["topic_id"], args_dict["course_id"])
-        element_title = str(element_html.title.string).strip()
-        element_content = ''.join([str(elem).strip() for elem in element_html.content.contents])
-        webview.set_title(element_title)
+        element_html = self.course_fs.get_element_html(
+            args_dict["element_id"], args_dict["topic_id"], args_dict["course_id"])
+        element_name = self.course_fs.get_element_attributes(
+            args_dict["element_id"], args_dict["topic_id"], args_dict["course_id"])["name"]
+        webview.set_title(element_name)
 
-        edit = args_dict.pop('edit', False)
+        lesson_model = self._load_html_lesson_model()
+        html_page = lesson_model.format(
+            # title=element_title,
+            content=element_html
+        )
 
-        if edit:
-            lesson_editor_model = self._load_html_editor_model()
-            html_page = lesson_editor_model.format(
-                title=element_title, content=element_content
-            )
-        else:
-            lesson_model = self._load_html_lesson_model()
-            html_page = lesson_model.format(
-                title=element_title, content=element_content
-            )
-
-        return {"message": html_page}
+        return {"message": re.sub('\s+', ' ', html_page)}
 
     @staticmethod
     def _load_html_lesson_model():
         with urllib.request.urlopen("http://localhost:8080/html/lesson_model.html") as html_file:
-            return html_file.read().decode("utf-8").replace('\n', '').replace('\r', '')
-
-    @staticmethod
-    def _load_html_editor_model():
-        with urllib.request.urlopen("http://localhost:8080/html/lesson_editor.html") as html_file:
-            return html_file.read().decode("utf-8").replace('\n', '').replace('\r', '')
+            return html_file.read().decode("utf-8")
 
     def set_title(self, args_dict):
         webview.set_title(args_dict['title'])

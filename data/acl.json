@@ -1,12 +1,12 @@
 {
-    "courses": {
-        "c-2": {
-            "everyone": false,
-            "u-1": "rw"
-        },
-        "c-4": {
-            "everyone": false,
-            "u-1": "r"
-        }
+  "courses": {
+    "c-2": {
+      "everyone": false,
+      "u-1": "rw"
+    },
+    "c-4": {
+      "everyone": false,
+      "u-1": "r"
     }
+  }
 }

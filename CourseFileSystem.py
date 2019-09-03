@@ -4,13 +4,12 @@ from Error import Error
 import shutil
 import os
 
+
 class CourseFileSystem:
 
     DEFAULT_COURSES_PATH = os.path.join("data", "Courses")
-    DEFAULT_HTML = "<title>{title}</title><content>{content}</content>"
 
     def __init__(self):
-
         """L'init di questa classe controlla che la cartella dei corsi esista e, in caso contrario,
         ne crea una nuova; successivamente viene creata un'istanza di CourseDescriptor che
         verrà utilizzata per la modifica di dati sul file descrittore."""
@@ -21,7 +20,6 @@ class CourseFileSystem:
         self.descriptor = CourseDescriptor()
 
     def get_courses_list(self):
-
         """Una funzione che restituisce la lista di corsi disponibili, controllando che siano
         presenti sia sul FileSystem che nel file descrittore
 
@@ -35,7 +33,6 @@ class CourseFileSystem:
         return [course for course in fs_courses if course in descriptor_courses]
 
     def get_topics_list(self, course_id):
-
         """Una funzione che restituisce la lista di topic disponibili di un corso, controllando che siano
         presenti sia sul FileSystem che nel file descrittore
 
@@ -45,14 +42,14 @@ class CourseFileSystem:
         :returns: Lista di topic disponibili per quel corso
         :rtype: list"""
 
-        fs_topics = os.listdir(os.path.join(CourseFileSystem.DEFAULT_COURSES_PATH, course_id))
+        fs_topics = os.listdir(os.path.join(
+            CourseFileSystem.DEFAULT_COURSES_PATH, course_id))
         descriptor_topics = self.descriptor.get_topics_list(course_id)
 
         # Controllo incrociato tra topics nel FileSystem e nel file descrittore
         return [topic for topic in fs_topics if topic in descriptor_topics]
 
     def get_elements_list(self, topic_id, course_id):
-
         """Funzione che restituisce la lista di elementi disponibili di un topic, controllando che siano
         presenti sia sul FileSystem che nel file descrittore
 
@@ -64,14 +61,15 @@ class CourseFileSystem:
         :returns: Lista di elementi disponibili per quel topic
         :rtype: list"""
 
-        fs_elements = os.listdir(os.path.join(CourseFileSystem.DEFAULT_COURSES_PATH, course_id, topic_id))
-        descriptor_elements = self.descriptor.get_elements_list(topic_id, course_id)
+        fs_elements = os.listdir(os.path.join(
+            CourseFileSystem.DEFAULT_COURSES_PATH, course_id, topic_id))
+        descriptor_elements = self.descriptor.get_elements_list(
+            topic_id, course_id)
 
         # Controllo incrociato tra elementi nel FileSystem e nel file descrittore
         return [element for element in fs_elements if element in descriptor_elements]
 
     def add_course(self, course_name):
-
         """Funzione che permette l'aggiunta di un corso
 
         :param course_name: Nome del corso da creare. Verrà utilizzato dal modulo CourseDescriptor
@@ -85,7 +83,8 @@ class CourseFileSystem:
 
         try:
             # Tento di creare la cartella del corso sul FileSystem
-            os.mkdir(os.path.join(CourseFileSystem.DEFAULT_COURSES_PATH, new_course_id))
+            os.mkdir(os.path.join(
+                CourseFileSystem.DEFAULT_COURSES_PATH, new_course_id))
         except OSError:
             return Error("io_error", "Errore nella creazione del corso")
 
@@ -96,7 +95,6 @@ class CourseFileSystem:
         return new_course_id
 
     def remove_course(self, course_id):
-
         """Funzione che permette di cancellare un corso
 
         :param course_id: Id del corso da cancellare
@@ -112,7 +110,6 @@ class CourseFileSystem:
         return True
 
     def add_topic(self, topic_name, course_id):
-
         """Funzione che permetta l'aggiunta di un topic
 
         :param topic_name: Nome del topic da creare
@@ -144,7 +141,6 @@ class CourseFileSystem:
         return new_topic_id
 
     def remove_topic(self, topic_id, course_id):
-
         """Funzione che permette di cancellare un topic
 
         :param topic_id: Id del topic da cancellare
@@ -168,7 +164,6 @@ class CourseFileSystem:
         return True
 
     def add_element(self, element_name, element_type, topic_id, course_id):
-
         """Funzione che permette l'aggiunta di un elemento
 
         :param element_name: Nome dell'elemento da aggiungere
@@ -198,14 +193,9 @@ class CourseFileSystem:
         except OSError:
             return Error("io_error", "Errore nella creazione dell'elemento")
 
-        # Inserisco il titolo all'interno dell'html del nuovo elemento
-        element_html = CourseFileSystem.DEFAULT_HTML.format(title=element_name, content='')
-        # Creo il parser html del nuovo elemento
-        element_html_parser = BeautifulSoup(element_html, "html.parser")
-
         # Creo il file "index.html" dell'elemento sul FileSystem e inserisco i vari tag
         with open(os.path.join(element_dir, "index.html"), "w") as html_file_object:
-            html_file_object.write(element_html_parser.prettify())
+            html_file_object.write('')
 
         # Tento di creare l'elemento sul file descrittore
         if not self.descriptor.add_element(element_name, element_type, new_element_id, topic_id, course_id):
@@ -213,26 +203,24 @@ class CourseFileSystem:
 
         return new_element_id
 
-    def edit_element(self, element_id, topic_id, course_id, element_title, element_content):
+    def edit_element(self, element_id, topic_id, course_id, element_html):
 
         # "Assemblo" la path dell'elemento
         element_dir = os.path.join(
             CourseFileSystem.DEFAULT_COURSES_PATH, course_id, topic_id, element_id
         )
 
-        # Inserisco il titolo all'interno dell'html dell'elemento
-        element_html = CourseFileSystem.DEFAULT_HTML.format(title=element_title, content=element_content)
         # Creo il parser html dell' elemento
         element_html_parser = BeautifulSoup(element_html, "html.parser")
 
         # Creo il file "index.html" dell'elemento sul FileSystem e inserisco i vari tag
-        with open(os.path.join(element_dir, "index.html"), "w") as html_file_object:
-            html_file_object.write(element_html_parser.prettify())
+        with open(os.path.join(element_dir, "index.html"), "w", encoding="utf-8") as html_file_object:
+            html_file_object.write(
+                element_html)
 
         return element_id
 
     def remove_element(self, element_id, topic_id, course_id):
-
         """Funzione che permette di cancellare un elemento
 
         :param element_id: Id dell'elemento da cancellare
@@ -257,7 +245,6 @@ class CourseFileSystem:
         return True
 
     def get_element_html(self, element_id, topic_id, course_id):
-
         """Funzione che restituisce il contenuto html di un elemento (lezione o quiz)
 
         :param element_id: Id dell'elemento da leggere
@@ -278,13 +265,11 @@ class CourseFileSystem:
         try:
             # Tento di aprire l'elemento e di leggerne il contenuto
             with open(os.path.join(element_dir, "index.html")) as element_object:
-                element_html = element_object.read().strip()
+                element_html = element_object.read().encode('utf-8').strip()
         except:
             return Error("Errore nella lettura dell'elemento")
 
         import re
-
-        print(re.sub(r'\n\s*\n', r'\n\n', element_html.strip(), flags=re.M))
 
         # Genero il parser che mi permetterà di accedere ai contenuti html dell'elemento con facilità
         element_html_parser = BeautifulSoup(element_html, "html.parser")
@@ -292,7 +277,6 @@ class CourseFileSystem:
         return element_html_parser
 
     def get_course_attributes(self, course_id):
-
         """Funzione che restituisce gli attributi di un corso presenti nel file descrittore
 
         :param course_id: Id del corso
@@ -304,7 +288,6 @@ class CourseFileSystem:
         return self.descriptor.get_course_attributes(course_id)
 
     def get_topic_attributes(self, topic_id, course_id):
-
         """Funzione che restituisce gli attributi di un topic presenti nel file descrittore
 
         :param topic_id: Id del topic
@@ -318,7 +301,6 @@ class CourseFileSystem:
         return self.descriptor.get_topic_attributes(topic_id, course_id)
 
     def get_element_attributes(self, element_id, topic_id, course_id):
-
         """Funzione che restituisce gli attributi di un elemento presenti nel file descrittore
 
         :param element_id: Id dell'elemento da leggere
@@ -335,7 +317,6 @@ class CourseFileSystem:
 
     @staticmethod
     def _create_courses_folder():
-
         """Funzione che controlla che la cartella dei corsi esista e, in caso contrario,
         ne crea una nuova
 
@@ -349,7 +330,6 @@ class CourseFileSystem:
 
     @staticmethod
     def is_course_file_system(value):
-
         """Funzione che verifica che una variabile sia di tipo CourseFileSystem
 
         :param value: Valore da verificare

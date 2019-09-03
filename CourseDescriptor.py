@@ -5,6 +5,7 @@ import json
 import time
 import os
 
+
 class CourseDescriptor():
 
     DEFAULT_DESCRIPTOR_JSON = {
@@ -15,19 +16,18 @@ class CourseDescriptor():
     }
 
     AVAILABLE_ELEMENT_TYPES = ["lesson", "quiz"]
-    DEFAULT_DESCRIPTOR_PATH = os.path.join("data", "descriptor.json") # DEFAULT DIRECTORY FOR DESCRIPTOR FILE
+    # DEFAULT DIRECTORY FOR DESCRIPTOR FILE
+    DEFAULT_DESCRIPTOR_PATH = os.path.join("data", "descriptor.json")
     DEFAULT_BACKUP_FOLDER = os.path.join("data", "backup_descriptor")
     DEFAULT_INDENT_LEVEL = 4
 
     def __init__(self):
-
         """L'init di questa classe controlla che il file descrittore esista e, in caso contrario,
         ne crea uno nuovo"""
 
         self.create_descriptor_file()
 
     def create_descriptor_file(self, overwrite=False, backup=True):
-
         """Funzione che crea un nuovo file descrittore, sostituendone uno già esistente in base
         al parametro "overwrite" e, nel caso, creandone un backup in base al parametro "backup"
 
@@ -48,7 +48,8 @@ class CourseDescriptor():
             # Creo e inserisco la struttura basilare nel nuovo file descrittore
             with open(CourseDescriptor.DEFAULT_DESCRIPTOR_PATH, "w") as file_object:
                 file_object.write(
-                    json.dumps(CourseDescriptor.DEFAULT_DESCRIPTOR_JSON, indent=4)
+                    json.dumps(
+                        CourseDescriptor.DEFAULT_DESCRIPTOR_JSON, indent=4)
                 )
 
             return True
@@ -63,7 +64,6 @@ class CourseDescriptor():
         return filtered_result
 
     def get_new_course_id(self):
-
         """Funzione che genera un id univoco per un corso
 
         :returns: Id del corso
@@ -81,7 +81,6 @@ class CourseDescriptor():
         return course_id
 
     def get_new_topic_id(self):
-
         """Funzione che genera un id univoco per un topic
 
         :returns: Id del topic
@@ -99,7 +98,6 @@ class CourseDescriptor():
         return topic_id
 
     def get_new_element_id(self):
-
         """Funzione che genera un id univoco per un elemento
 
         :returns: Id dell'elemento
@@ -117,7 +115,6 @@ class CourseDescriptor():
         return element_id
 
     def get_courses_list(self):
-
         """Funzione che restituisce la lista dei corsi disponibili nel file descrittore
 
         :returns: Lista dei corsi
@@ -131,7 +128,6 @@ class CourseDescriptor():
         return list(filtered_data.keys())
 
     def get_topics_list(self, course_id):
-
         """Funzione che restituisce la lista dei topic disponibili di un corso nel file descrittore
 
         :param course_id: Id del corso di cui si vogliono conoscere i topic
@@ -143,12 +139,12 @@ class CourseDescriptor():
         # Recupero il contenuto del file descrittore
         descriptor_data = self._read_descriptor_data()
 
-        filtered_data = self.filter_deleted(descriptor_data["courses"][course_id]["topics"])
+        filtered_data = self.filter_deleted(
+            descriptor_data["courses"][course_id]["topics"])
 
         return list(filtered_data.keys())
 
     def get_elements_list(self, topic_id, course_id):
-
         """Funzione che restituisce la lista degli elementi disponibili di un topic di un corso
         nel file descrittore
 
@@ -170,7 +166,6 @@ class CourseDescriptor():
         return list(filtered_data.keys())
 
     def get_course_attributes(self, course_id):
-
         """Funzione che restituisce gli attributi di un corso
 
         :param course_id: Id del corso
@@ -184,7 +179,6 @@ class CourseDescriptor():
         return descriptor_data["courses"][course_id]
 
     def get_topic_attributes(self, topic_id, course_id):
-
         """Funzione che restituisce gli attributi di un topic di un corso
 
         :param topic_id: Id del topic di cui si vogliono conoscere gli attributi
@@ -200,7 +194,6 @@ class CourseDescriptor():
         return descriptor_data["courses"][course_id]["topics"][topic_id]
 
     def get_element_attributes(self, element_id, topic_id, course_id):
-
         """Funzione che restituisce gli attributi di un elemento di un topic in un corso
 
         :param element_id: Id dell'elemento di cui si vogliono conoscere gli attributi
@@ -218,7 +211,6 @@ class CourseDescriptor():
         return descriptor_data["courses"][course_id]["topics"][topic_id]["elements"][element_id]
 
     def add_course(self, course_name, course_id):
-
         """Funzione che permette l'aggiunta di un corso
 
         :param course_name: Nome del corso da aggiungere
@@ -249,7 +241,6 @@ class CourseDescriptor():
         return True
 
     def remove_course(self, course_id):
-
         """Funzione che permette di cancellare un corso
 
         :param course_id: Id del corso da cancellare
@@ -274,7 +265,6 @@ class CourseDescriptor():
         return True
 
     def add_topic(self, topic_name, topic_id, course_id):
-
         """Funzione che permette l'aggiunta di un topic
 
         :param topic_name: Nome del topic da aggiungere
@@ -307,7 +297,6 @@ class CourseDescriptor():
         return True
 
     def remove_topic(self, topic_id, course_id):
-
         """Funzione che permette di cancellare un topic
 
         :param topic_id: Id del topic da cancellare
@@ -334,7 +323,6 @@ class CourseDescriptor():
         return True
 
     def add_element(self, element_name, element_type, element_id, topic_id, course_id):
-
         """Funzione che permette l'aggiunta di un elemento
 
         :param element_name: Nome dell'elemento da aggiungere
@@ -365,7 +353,7 @@ class CourseDescriptor():
         new_element = {
             "name": element_name, "type": element_type,
             "creation date": datetime.now().isoformat(),
-            "modify date": datetime.now().isoformat(),
+            "edit date": datetime.now().isoformat(),
             "delete date": None
         }
         descriptor_data["courses"][course_id]["topics"][topic_id]["elements"][element_id] = new_element
@@ -375,8 +363,19 @@ class CourseDescriptor():
 
         return True
 
-    def remove_element(self, element_id, topic_id, course_id):
+    def edit_element(self, element_name, element_id, topic_id, course_id):
 
+        # Controllo che l'elemento esista
+        if not element_id in self.get_elements_list(topic_id, course_id):
+            return False
+
+        descriptor_data = self._read_descriptor_data()
+
+        # Recupero la lista degli elementi dal file descrittore e cancello la entry
+        elements_list = descriptor_data["courses"][course_id]["topics"][topic_id]["elements"]
+        elements_list[element_id]["delete date"] = datetime.now().isoformat()
+
+    def remove_element(self, element_id, topic_id, course_id):
         """Funzione che permette di cancellare un elemento
 
         :param element_id: Id dell'elemento da cancellare
@@ -406,7 +405,6 @@ class CourseDescriptor():
 
     @staticmethod
     def _read_descriptor_data():
-
         """Funzione che restituisce il contenuto del file descrittore
 
         :returns: Contenuto del file descrittore
@@ -420,7 +418,6 @@ class CourseDescriptor():
     @staticmethod
     # Caution while writing descriptor, it will overwrite everything!
     def _write_descriptor_data(new_descriptor, backup=False):
-
         """Funzione che permette di scrivere sul file descrittore. La scrittura non avviene
         in modalità "append", ecco perchè bisogna stare attenti altrimenti si rischia di
         perdere tutto il contenuto del file descrittore
@@ -448,7 +445,6 @@ class CourseDescriptor():
 
     @staticmethod
     def _create_backup_file():
-
         """Funzione che controlla che esista un file descrittore e ne crea una copia
         nella cartella di backup. Ogni file di backup conterrà nel suo nome la data di creazione,
         che permetterà di identificarlo più facilmente
@@ -474,7 +470,6 @@ class CourseDescriptor():
 
     @staticmethod
     def _create_backup_folder():
-
         """Funzione che controlla che la cartella di backup del file descrittore esista e,
         in caso contrario, ne crea una nuova
 
@@ -489,7 +484,6 @@ class CourseDescriptor():
 
     @staticmethod
     def _is_course_descriptor(value):
-
         """Funzione che verifica che una variabile sia di tipo CourseDescriptor
 
         :param value: Valore da verificare

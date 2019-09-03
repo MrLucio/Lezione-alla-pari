@@ -26,7 +26,14 @@
 <body>
     <div id="overlay" style="display:none">
         <div id="message">
-            <div id="editor-container"></div>
+            <div id="content-editor"></div>
+            <br><br>
+            <button class="btn btn-default" id="back-btn" onclick="toggleOverlay()">
+                Torna alla home
+            </button>
+            <button class="btn btn-success collapse" id="edit-btn" onclick="editElement()">
+                Salva
+            </button>
         </div>
     </div>
     <div id="loader"></div>
@@ -142,11 +149,14 @@
     <script type="text/javascript" src="http://localhost:8080/js/bootstrap.min.js"></script>
     <!-- MDB core JavaScript -->
     <script type="text/javascript" src="http://localhost:8080/js/mdb.min.js"></script>
+    <!-- Highlight JS -->
+    <script type="text/javascript" src="http://localhost:8080/js/highlight.min.js"></script>
     <!-- Quill Core JS-->
     <script type="text/javascript" src="http://localhost:8080/js/quill.core.js"></script>
     <!-- Quill JS -->
     <script type="text/javascript" src="http://localhost:8080/js/quill.min.js"></script>
     <!-- Custom JS -->
+    <script type="text/javascript" src="http://localhost:8080/js/lesson_editor.js" defer></script>
     <script type="text/javascript" src="http://localhost:8080/js/script.js" defer></script>
 
 
