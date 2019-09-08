@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 from Error import Error
 import shutil
 import os
+import json
 
 
 class CourseFileSystem:
@@ -163,21 +164,44 @@ class CourseFileSystem:
 
         return True
 
-    def add_element(self, element_name, element_type, topic_id, course_id):
-        """Funzione che permette l'aggiunta di un elemento
+    def add_lesson(self, element_name, topic_id, course_id):
+        """Funzione che permette l'aggiunta di una lezione
 
-        :param element_name: Nome dell'elemento da aggiungere
+        :param element_name: Nome della lezione da aggiungere
         :type element_name: str
-        :param element_type: Tipo dell'elemento che si vuole creare ("lesson" oppure "quiz")
-        :type element_type: str
         :param topic_id: Id del topic che contiene l'elemento
         :type topic_id: str
         :param course_id: Id del corso che contiene il topic che a sua volta contiene l'elemento
         :type course_id: str
 
-        :returns: True se l'operazione è andata a buon fine oppure errore
+        :returns: True se l'operazione è andata a buon fine oppure Errore
         :rtype: bool o Error"""
 
+        # Genero un id univoco per l'elemento
+        new_element_id = self.descriptor.get_new_element_id()
+
+        # "Assemblo" la path dell'elemento da aggiungere
+        element_dir = os.path.join(
+            CourseFileSystem.DEFAULT_COURSES_PATH, course_id, topic_id, new_element_id
+        )
+
+        try:
+            # Tento di creare la cartella dell'elemento sul FileSystem
+            os.mkdir(element_dir)
+        except OSError:
+            return Error("io_error", "Errore nella creazione dell'elemento")
+
+        # Creo il file "index.html" dell'elemento sul FileSystem e inserisco i vari tag
+        with open(os.path.join(element_dir, "index.html"), "w") as html_file_object:
+            html_file_object.write('')
+
+        # Tento di creare l'elemento sul file descrittore
+        if not self.descriptor.add_element(element_name, "lesson", new_element_id, topic_id, course_id):
+            return Error("Errore durante la creazione dell'elemento")
+
+        return new_element_id
+
+    def add_quiz(self, element_name, topic_id, course_id):
         # Genero un id univoco per l'elemento
         new_element_id = self.descriptor.get_new_element_id()
 
@@ -194,16 +218,14 @@ class CourseFileSystem:
             return Error("io_error", "Errore nella creazione dell'elemento")
 
         # Creo il file "index.html" dell'elemento sul FileSystem e inserisco i vari tag
-        with open(os.path.join(element_dir, "index.html"), "w") as html_file_object:
-            html_file_object.write('')
+        with open(os.path.join(element_dir, "index.json"), "w") as quiz_object:
+            quiz_object.write(json.dumps({"questions":{"count":0}, "stats":{}}, indent=4))
 
         # Tento di creare l'elemento sul file descrittore
-        if not self.descriptor.add_element(element_name, element_type, new_element_id, topic_id, course_id):
+        if not self.descriptor.add_element(element_name, "quiz", new_element_id, topic_id, course_id):
             return Error("Errore durante la creazione dell'elemento")
 
-        return new_element_id
-
-    def edit_element(self, element_id, topic_id, course_id, element_html):
+    def edit_lesson(self, element_id, topic_id, course_id, element_html):
 
         # "Assemblo" la path dell'elemento
         element_dir = os.path.join(
@@ -219,6 +241,20 @@ class CourseFileSystem:
                 element_html)
 
         return element_id
+
+    def edit_quiz(self, element_id, topic_id, course_id, element_json):
+
+        # "Assemblo" la path dell'elemento
+        element_dir = os.path.join(
+            CourseFileSystem.DEFAULT_COURSES_PATH, course_id, topic_id, element_id
+        )
+
+        # Creo il file "index.html" dell'elemento sul FileSystem e inserisco i vari tag
+        with open(os.path.join(element_dir, "index.json"), "w") as quiz_object:
+            quiz_object.write(json.dumps(element_json, indent=4))
+
+        return element_id
+
 
     def remove_element(self, element_id, topic_id, course_id):
         """Funzione che permette di cancellare un elemento
@@ -244,7 +280,7 @@ class CourseFileSystem:
 
         return True
 
-    def get_element_html(self, element_id, topic_id, course_id):
+    def get_lesson_html(self, element_id, topic_id, course_id):
         """Funzione che restituisce il contenuto html di un elemento (lezione o quiz)
 
         :param element_id: Id dell'elemento da leggere
@@ -269,12 +305,23 @@ class CourseFileSystem:
         except:
             return Error("Errore nella lettura dell'elemento")
 
-        import re
-
         # Genero il parser che mi permetterà di accedere ai contenuti html dell'elemento con facilità
         element_html_parser = BeautifulSoup(element_html, "html.parser")
 
         return element_html_parser
+
+    def get_quiz_json(self, element_id, topic_id, course_id):
+
+        quiz_dir = os.path.join(
+            CourseFileSystem.DEFAULT_COURSES_PATH, course_id, topic_id, element_id
+        )
+
+        try:
+            # Tento di aprire il quiz e di leggerne il contenuto
+            with open(os.path.join(quiz_dir, "index.json")) as quiz_object:
+                return json.loads(quiz_object.read())
+        except:
+            return Error("Errore nella lettura dell'elemento")
 
     def get_course_attributes(self, course_id):
         """Funzione che restituisce gli attributi di un corso presenti nel file descrittore

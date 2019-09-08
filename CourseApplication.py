@@ -1,6 +1,7 @@
 from PermissionManager import PermissionManager
 from CourseFileSystem import CourseFileSystem
 from UserManager import UserManager
+from QuizManager import QuizManager
 from bs4 import BeautifulSoup
 from Error import Error
 
@@ -69,17 +70,16 @@ class Api:
             args_dict["topic_id"], args_dict["course_id"])
         return args_dict["topic_id"]
 
-    def add_element(self, args_dict):
-        id = self.course_fs.add_element(args_dict["element_name"], args_dict["element_type"], args_dict["topic_id"],
+    def add_lesson(self, args_dict):
+        id = self.course_fs.add_lesson(args_dict["element_name"], args_dict["topic_id"],
                                         args_dict["course_id"])
         return id
 
-    def edit_element(self, args_dict):
-        self.course_fs.edit_element(
+    def edit_lesson(self, args_dict):
+        self.course_fs.edit_lesson(
             args_dict["element_id"], args_dict["topic_id"], args_dict["course_id"],
             args_dict["element_html"]
         )
-        pass
 
     def remove_element(self, args_dict):
         self.course_fs.remove_element(
@@ -106,7 +106,7 @@ class Api:
                                                                  args_dict["course_id"])}
 
     def load_lesson_html(self, args_dict):
-        element_html = self.course_fs.get_element_html(
+        element_html = self.course_fs.get_lesson_html(
             args_dict["element_id"], args_dict["topic_id"], args_dict["course_id"])
         element_name = self.course_fs.get_element_attributes(
             args_dict["element_id"], args_dict["topic_id"], args_dict["course_id"])["name"]
