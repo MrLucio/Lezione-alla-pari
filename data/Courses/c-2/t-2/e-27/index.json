@@ -1,6 +1,30 @@
 {
+    "count": 1,
     "questions": {
-        "count": 0
+        "q-0": {
+            "type": "checkbox",
+            "text": "How many potatoes is a pair of potatoes?",
+            "wrong_answers": [
+                "3",
+                "5"
+            ],
+            "correct_answers": [
+                "2",
+                "exactly 2"
+            ]
+        },
+        "q-1": {
+            "type": "checkbox",
+            "text": "Am I cool?",
+            "wrong_answers": [
+                "No",
+                "A little bit"
+            ],
+            "correct_answers": [
+                "Hell yea!",
+                "Marry me"
+            ]
+        }
     },
     "stats": {}
 }

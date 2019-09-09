@@ -2,7 +2,7 @@ from datetime import datetime
 from Error import Error
 import json
 import os
-import re   
+import re
 
 
 class QuizManager:
@@ -14,8 +14,8 @@ class QuizManager:
         return self.quiz_dict
 
     def get_new_question_id(self):
-        new_id = self.quiz_dict["questions"]["count"]
-        self.quiz_dict["questions"]["count"] += 1
+        new_id = self.quiz_dict["count"]
+        self.quiz_dict["count"] += 1
 
         return new_id
 

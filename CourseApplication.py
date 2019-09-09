@@ -105,6 +105,9 @@ class Api:
         return {"message": self.course_fs.get_element_attributes(args_dict["element_id"], args_dict["topic_id"],
                                                                  args_dict["course_id"])}
 
+    def get_quiz_json(self, args_dict):
+        return {"message": self.course_fs.get_quiz_json(args_dict["element_id"], args_dict["topic_id"], args_dict["course_id"])["questions"]}
+
     def load_lesson_html(self, args_dict):
         element_html = self.course_fs.get_lesson_html(
             args_dict["element_id"], args_dict["topic_id"], args_dict["course_id"])

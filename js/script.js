@@ -116,6 +116,8 @@ async function refreshElements(topic_id, course_id, mode) {
     course_id: course_id
   });
 
+  let button;
+
   if (mode == "r") {
     for (const element_id of elementsdict.message) {
       element_properties = await pywebview.api.get_element_attributes({
@@ -123,9 +125,15 @@ async function refreshElements(topic_id, course_id, mode) {
         topic_id: topic_id,
         course_id: course_id
       });
-      let button = createButtonR(element_id, element_properties.message.name, function () {
-        loadLesson(element_id, topic_id, course_id);
-      })
+      if (element_properties.message.type == "lesson") {
+        button = createButtonR(element_id, element_properties.message.name, function () {
+          loadLesson(element_id, topic_id, course_id);
+        })
+      } else {
+        button = createButtonR(element_id, element_properties.message.name, function () {
+          loadQuiz(element_id, topic_id, course_id);
+        })
+      }
       $("#elements").append(button);
     }
   } else {
@@ -135,9 +143,15 @@ async function refreshElements(topic_id, course_id, mode) {
         topic_id: topic_id,
         course_id: course_id
       });
-      let button = createButtonRW(element_id, element_properties.message.name, function () {
-        loadLesson(element_id, topic_id, course_id);
-      })
+      if (element_properties.message.type == "lesson") {
+        button = createButtonRW(element_id, element_properties.message.name, function () {
+          loadLesson(element_id, topic_id, course_id);
+        })
+      } else {
+        button = createButtonRW(element_id, element_properties.message.name, function () {
+          loadQuiz(element_id, topic_id, course_id);
+        })
+      }
       $("#elements").append(button);
     }
   }
@@ -164,6 +178,7 @@ function createButtonR(id, name, onclick) {
 
 async function loadLesson(element_id, topic_id, course_id) {
   show("#loader");
+  $("#quiz-div").empty();
   selected_element_html = await pywebview.api.load_lesson_html({
     element_id: element_id,
     topic_id: topic_id,
@@ -173,8 +188,63 @@ async function loadLesson(element_id, topic_id, course_id) {
   quill.disable();
   $(".ql-toolbar").hide();
   $("#edit-btn").hide();
+  $("#content-editor").show();
   hide("#loader");
   toggleMain();
+}
+
+async function loadQuiz(element_id, topic_id, course_id) {
+  show("#loader");
+  $("#quiz-div").empty();
+  quill.disable();
+  $(".ql-toolbar").hide();
+  $("#content-editor").hide();
+  $("#edit-btn").hide();
+
+  let questions = await pywebview.api.get_quiz_json({
+    element_id: element_id,
+    topic_id: topic_id,
+    course_id: course_id,
+  });
+
+  for (const [key, value] of Object.entries(questions.message)) {
+    let container = document.createElement('div');
+    container.classList += 'container border-top pt-3'
+    container.id = key;
+
+    let question_text = document.createElement('h4');
+    question_text.innerHTML = value["text"]
+    question_text.classList += "mb-3"
+    container.appendChild(question_text);
+
+    let answers = document.createElement('div')
+    answers.classList += " form-check mb-3"
+
+    switch (value["type"]) {
+      case "checkbox":
+        let answers_array = shuffle(value["wrong_answers"].concat(value["correct_answers"]))
+        answers_array.forEach(function (value) {
+          answers.innerHTML = '<input class="form-check-input" type="checkbox"><label class="form-check-label">' + value + '</label>'
+          container.appendChild(answers.cloneNode(true));
+        })
+        break;
+
+      default:
+        break;
+    }
+    $("#quiz-div").append(container.cloneNode(true))
+  }
+
+  toggleMain();
+  hide("#loader");
+}
+
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
 }
 
 async function editLesson() {

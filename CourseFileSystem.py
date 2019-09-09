@@ -219,7 +219,7 @@ class CourseFileSystem:
 
         # Creo il file "index.html" dell'elemento sul FileSystem e inserisco i vari tag
         with open(os.path.join(element_dir, "index.json"), "w") as quiz_object:
-            quiz_object.write(json.dumps({"questions":{"count":0}, "stats":{}}, indent=4))
+            quiz_object.write(json.dumps({"count":0,"questions":{}, "stats":{}}, indent=4))
 
         # Tento di creare l'elemento sul file descrittore
         if not self.descriptor.add_element(element_name, "quiz", new_element_id, topic_id, course_id):
