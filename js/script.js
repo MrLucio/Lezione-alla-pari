@@ -196,10 +196,10 @@ async function loadLesson(element_id, topic_id, course_id) {
 async function loadQuiz(element_id, topic_id, course_id) {
   show("#loader");
   $("#quiz-div").empty();
-  quill.disable();
-  $(".ql-toolbar").hide();
-  $("#content-editor").hide();
-  $("#edit-btn").hide();
+
+  $("#send-quiz-btn").click(function () {
+    submitQuiz(element_id, topic_id, course_id);
+  })
 
   let questions = await pywebview.api.get_quiz_json({
     element_id: element_id,
@@ -218,15 +218,34 @@ async function loadQuiz(element_id, topic_id, course_id) {
     container.appendChild(question_text);
 
     let answers = document.createElement('div')
-    answers.classList += " form-check mb-3"
+    answers.classList += " mb-3"
+
+    let answers_array;
 
     switch (value["type"]) {
       case "checkbox":
-        let answers_array = shuffle(value["wrong_answers"].concat(value["correct_answers"]))
-        answers_array.forEach(function (value) {
+        answers.classList += " form-check"
+        container.setAttribute('data-type', 'checkbox');
+        answers_array = shuffle(value["wrong_answers"].concat(value["correct_answers"]))
+        for (const value of answers_array) {
           answers.innerHTML = '<input class="form-check-input" type="checkbox"><label class="form-check-label">' + value + '</label>'
           container.appendChild(answers.cloneNode(true));
-        })
+        }
+        break;
+      case "radio":
+        answers.classList += " form-check"
+        container.setAttribute('data-type', 'radio');
+        answers_array = shuffle(value["wrong_answers"].concat([value["correct_answer"]]));
+        for (const value of answers_array) {
+          answers.innerHTML = '<input class="form-check-input" name="' + key + '" type="radio"><label class="form-check-label">' + value + '</label>'
+          container.appendChild(answers.cloneNode(true));
+        }
+        break;
+      case "open":
+        answers.classList += " form-group"
+        container.setAttribute('data-type', 'open');
+        answers.innerHTML = '<input type="text" class="form-control" placeholder="Answer">'
+        container.appendChild(answers.cloneNode(true));
         break;
 
       default:
@@ -235,16 +254,40 @@ async function loadQuiz(element_id, topic_id, course_id) {
     $("#quiz-div").append(container.cloneNode(true))
   }
 
-  toggleMain();
+  toggleMain("#quiz-overlay");
   hide("#loader");
 }
 
-function shuffle(a) {
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
+async function submitQuiz(element_id, topic_id, course_id) {
+  let given_answers = {}
+  $('#quiz-div').children().each(function () {
+    let question_id = $(this).attr('id')
+    switch ($(this).data("type")) {
+      case "checkbox":
+        given_answers[question_id] = [];
+        $(this).find("input:checked").each(function () {
+          given_answers[question_id].push($(this).next().text());
+        });
+        break;
+      case "radio":
+        given_answers[question_id] = ""
+        $(this).find("input:checked").each(function () {
+          given_answers[question_id] = $(this).next().text();
+        });
+        break;
+      case "open":
+        $(this).find("input").each(function () {
+          given_answers[question_id] = $(this).val();
+        });
+        break;
+    }
+  });
+  await pywebview.api.submit_quiz({
+    element_id: element_id,
+    topic_id: topic_id,
+    course_id: course_id,
+    answers: given_answers
+  });
 }
 
 async function editLesson() {
@@ -259,19 +302,19 @@ async function editLesson() {
   hide("#loader");
 }
 
-function toggleMain() {
+function toggleMain(overlay = "#lesson-overlay") {
   $("#main").fadeToggle("slow", function () {
-    $("#overlay").fadeToggle("fast");
+    $(overlay).fadeToggle("fast");
   });
 }
 
-function toggleOverlay(resetTitle = true) {
+function toggleOverlay(overlay = "#lesson-overlay", resetTitle = true) {
   if (resetTitle)
     pywebview.api.set_title({
       title: "Lezioni alla pari"
     });
 
-  $("#overlay").fadeToggle("slow", function () {
+  $(overlay).fadeToggle("slow", function () {
     $("#main").fadeToggle("fast");
   });
 }
@@ -301,7 +344,7 @@ function addMenuListeners() {
     )
       return;
 
-    selected = ev.target.id; // TODO Variabile globale
+    selected = ev.target.id;
     $(".menu").css("top", ev.clientY - 20);
     $(".menu").css("left", ev.clientX - 20);
     $(".menu").addClass("menu-on");
@@ -341,7 +384,7 @@ function addMenuListeners() {
     $(".ql-editor").html(selected_element_html.message);
     quill.enable();
     $(".ql-toolbar").show();
-    $("#edit-btn").show();
+    $("#edit-lesson-btn").show();
     hide("#loader");
     toggleMain();
   });
@@ -379,6 +422,19 @@ $(window).on("load", function () {
   addMenuListeners();
   hide("#loader");
 });
+
+// Overlay button events
+
+$("#back-lesson-btn").click(function () {
+  toggleOverlay()
+})
+$("#edit-lesson-btn").click(function () {
+  editLesson()
+})
+$("#back-quiz-btn").click(function () {
+  toggleOverlay("#quiz-overlay")
+});
+
 
 // Functions for creation modal
 
@@ -491,3 +547,11 @@ $("#confirm-submit").click(async function () {
       break;
   }
 });
+
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}

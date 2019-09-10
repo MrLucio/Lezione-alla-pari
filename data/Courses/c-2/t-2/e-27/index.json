@@ -1,5 +1,5 @@
 {
-    "count": 1,
+    "count": 4,
     "questions": {
         "q-0": {
             "type": "checkbox",
@@ -24,6 +24,20 @@
                 "Hell yea!",
                 "Marry me"
             ]
+        },
+        "q-2": {
+            "type": "radio",
+            "text": "Is the earth a moon?",
+            "wrong_answers": [
+                "Yes",
+                "Probably"
+            ],
+            "correct_answer": "No"
+        },
+        "q-3": {
+            "type": "open",
+            "text": "What is Napoleon's Surname?",
+            "correct_answers": ["Bonaparte", "bonaparte"]
         }
     },
     "stats": {}

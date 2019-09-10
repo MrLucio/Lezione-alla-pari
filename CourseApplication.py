@@ -108,6 +108,10 @@ class Api:
     def get_quiz_json(self, args_dict):
         return {"message": self.course_fs.get_quiz_json(args_dict["element_id"], args_dict["topic_id"], args_dict["course_id"])["questions"]}
 
+    def submit_quiz(self, args_dict):
+        quiz_mgr = QuizManager(self.course_fs.get_quiz_json(args_dict["element_id"], args_dict["topic_id"], args_dict["course_id"])["questions"])
+        quiz_mgr.evaluate_answers(self._logged_user, args_dict["answers"])
+
     def load_lesson_html(self, args_dict):
         element_html = self.course_fs.get_lesson_html(
             args_dict["element_id"], args_dict["topic_id"], args_dict["course_id"])

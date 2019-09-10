@@ -52,6 +52,9 @@ class QuizManager:
         del self.quiz_dict["questions"][question_id]
         return True
 
+    def evaluate_answers(self, user_id, answers):
+        print(answers)
+
     def add_attempt(self, user_id, mark, answers):
         if user_id not in self.quiz_dict["stats"]:
             self.quiz_dict["stats"][user_id] = []
