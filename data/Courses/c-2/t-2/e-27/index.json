@@ -37,7 +37,10 @@
         "q-3": {
             "type": "open",
             "text": "What is Napoleon's Surname?",
-            "correct_answers": ["Bonaparte", "bonaparte"]
+            "correct_answers": [
+                "Bonaparte",
+                "bonaparte"
+            ]
         }
     },
     "stats": {}

@@ -53,10 +53,38 @@ class QuizManager:
         return True
 
     def evaluate_answers(self, user_id, answers):
-        print(answers)
+        scores = {}
+        for key, value in answers.items():
+            question_type = self.quiz_dict["questions"][key]["type"]
 
-    def add_attempt(self, user_id, mark, answers):
+            if question_type == "checkbox":
+                wrong_answers = [i for i in value if i in self.quiz_dict["questions"][key]["wrong_answers"]]
+                correct_answers = [i for i in value if i in self.quiz_dict["questions"][key]["correct_answers"]]
+                points = len(correct_answers)- len(wrong_answers)
+                if points >= 0:
+                    scores[key] = points/len(self.quiz_dict["questions"][key]["correct_answers"])
+                else:
+                    scores[key] = 0
+            elif question_type == "radio":
+                if value == self.quiz_dict["questions"][key]["correct_answer"]:
+                    scores[key] = 1
+                else:
+                    scores[key] = 0
+            elif question_type == "open":
+                if value in self.quiz_dict["questions"][key]["correct_answers"]:
+                    scores[key] = 1
+                else:
+                    scores[key] = 0
+        return scores
+        
+    def add_attempt(self, user_id, answers, scores):
         if user_id not in self.quiz_dict["stats"]:
             self.quiz_dict["stats"][user_id] = []
-        
-        self.quiz_dict["stats"][user_id].append({"date": datetime.now().isoformat(), "mark": mark, "answers": answers})
+        mark = sum(scores.values())/len(scores) * 10
+        self.quiz_dict["stats"][user_id].append({"date": datetime.now().isoformat(), "mark": mark, "answers": answers, "scores": scores})
+
+    def get_user_attempts(self, user_id):
+        if user_id in self.quiz_dict["stats"]:
+            return self.quiz_dict["stats"][user_id]
+        else:
+            return None

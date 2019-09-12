@@ -131,7 +131,7 @@ async function refreshElements(topic_id, course_id, mode) {
         })
       } else {
         button = createButtonR(element_id, element_properties.message.name, function () {
-          loadQuiz(element_id, topic_id, course_id);
+          loadQuizMenu(element_id, topic_id, course_id, element_properties.message.name);
         })
       }
       $("#elements").append(button);
@@ -149,7 +149,7 @@ async function refreshElements(topic_id, course_id, mode) {
         })
       } else {
         button = createButtonRW(element_id, element_properties.message.name, function () {
-          loadQuiz(element_id, topic_id, course_id);
+          loadQuizMenu(element_id, topic_id, course_id, element_properties.message.name);
         })
       }
       $("#elements").append(button);
@@ -178,7 +178,6 @@ function createButtonR(id, name, onclick) {
 
 async function loadLesson(element_id, topic_id, course_id) {
   show("#loader");
-  $("#quiz-div").empty();
   selected_element_html = await pywebview.api.load_lesson_html({
     element_id: element_id,
     topic_id: topic_id,
@@ -187,21 +186,60 @@ async function loadLesson(element_id, topic_id, course_id) {
   $(".ql-editor").html(selected_element_html.message);
   quill.disable();
   $(".ql-toolbar").hide();
-  $("#edit-btn").hide();
+  $("#edit-lesson-btn").hide();
   $("#content-editor").show();
   hide("#loader");
   toggleMain();
+}
+
+async function loadQuizMenu(element_id, topic_id, course_id, name) {
+  show("#loader");
+  $("#quiz-attempts").empty();
+
+  let attempts = await pywebview.api.get_user_attempts({
+    element_id: element_id,
+    topic_id: topic_id,
+    course_id: course_id,
+  });
+
+  $("#begin-quiz-btn").unbind("click").click(function () {
+    loadQuiz(element_id, topic_id, course_id);
+  });
+  $("#quiz-title").html(name);
+
+  if (attempts) {
+    table = '<table class="table"><thead><tr><th scope="col">Data Tentativo</th>\
+    <th scope="col">Voto</th></tr></thead><tbody>'
+    for (attempt of attempts) {
+      date = new Date(attempt["date"]);
+      date = date.getFullYear() + '/' + (date.getMonth() + 1) + '/' + date.getDate();
+      table += ('<tr><td>' + date + '</td><td>' + attempt["mark"] + '</td></tr>');
+    }
+    table += '</tbody></table>'
+    $("#quiz-attempts").append(table)
+  } else {
+    let paragraph = document.createElement('h5');
+    paragraph.classList += 'lead mb-4 mt-4 text-center'
+    paragraph.innerHTML = "You haven't tried this quiz yet, why not give it a go?"
+    $("#quiz-attempts").append(paragraph);
+  }
+  $("#quiz-menu").fadeIn(1, function () {
+    $("#quiz-container").fadeOut(1);
+  });
+
+  hide("#loader");
+  toggleMain("#quiz-overlay");
 }
 
 async function loadQuiz(element_id, topic_id, course_id) {
   show("#loader");
   $("#quiz-div").empty();
 
-  $("#send-quiz-btn").click(function () {
+  $("#quiz-modal-submit").unbind("click").click(function () {
     submitQuiz(element_id, topic_id, course_id);
-  })
+  });
 
-  let questions = await pywebview.api.get_quiz_json({
+  let questions = await pywebview.api.get_quiz_questions({
     element_id: element_id,
     topic_id: topic_id,
     course_id: course_id,
@@ -253,9 +291,10 @@ async function loadQuiz(element_id, topic_id, course_id) {
     }
     $("#quiz-div").append(container.cloneNode(true))
   }
-
-  toggleMain("#quiz-overlay");
   hide("#loader");
+  $("#quiz-menu").fadeOut(function () {
+    $("#quiz-container").fadeIn();
+  })
 }
 
 async function submitQuiz(element_id, topic_id, course_id) {
@@ -288,6 +327,9 @@ async function submitQuiz(element_id, topic_id, course_id) {
     course_id: course_id,
     answers: given_answers
   });
+
+  $('#quiz-modal').modal('toggle');
+  toggleOverlay("#quiz-overlay")
 }
 
 async function editLesson() {
@@ -402,6 +444,23 @@ function addMenuListeners() {
   });
 }
 
+// Events for various buttons
+$("#back-lesson-btn").click(function () {
+  toggleOverlay()
+})
+$("#edit-lesson-btn").click(function () {
+  editLesson()
+})
+$("#back-quiz-btn").click(function () {
+  toggleOverlay("#quiz-overlay")
+});
+$("#back-menu-btn").click(function () {
+  toggleOverlay("#quiz-overlay")
+});
+$("#send-quiz-btn").click(function () {
+  $('#quiz-modal').modal('toggle');
+})
+
 $(window).on("load", function () {
   show("#loader");
   // Polling System for ensuring Pywebview is loaded
@@ -423,17 +482,6 @@ $(window).on("load", function () {
   hide("#loader");
 });
 
-// Overlay button events
-
-$("#back-lesson-btn").click(function () {
-  toggleOverlay()
-})
-$("#edit-lesson-btn").click(function () {
-  editLesson()
-})
-$("#back-quiz-btn").click(function () {
-  toggleOverlay("#quiz-overlay")
-});
 
 
 // Functions for creation modal
@@ -500,7 +548,7 @@ $("#modal-submit").click(async function () {
   }
 });
 
-// Functions for confirmation modal
+// Functions for deletion modal
 
 $("#confirm.modal").on("show.bs.modal", function (event) {
   $("#modal-data-type").val(button.data("type"));
@@ -547,6 +595,8 @@ $("#confirm-submit").click(async function () {
       break;
   }
 });
+
+// Array Shuffle Function
 
 function shuffle(a) {
   for (let i = a.length - 1; i > 0; i--) {

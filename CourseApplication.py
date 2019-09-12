@@ -105,12 +105,18 @@ class Api:
         return {"message": self.course_fs.get_element_attributes(args_dict["element_id"], args_dict["topic_id"],
                                                                  args_dict["course_id"])}
 
-    def get_quiz_json(self, args_dict):
+    def get_quiz_questions(self, args_dict):
         return {"message": self.course_fs.get_quiz_json(args_dict["element_id"], args_dict["topic_id"], args_dict["course_id"])["questions"]}
 
     def submit_quiz(self, args_dict):
-        quiz_mgr = QuizManager(self.course_fs.get_quiz_json(args_dict["element_id"], args_dict["topic_id"], args_dict["course_id"])["questions"])
-        quiz_mgr.evaluate_answers(self._logged_user, args_dict["answers"])
+        quiz_mgr = QuizManager(self.course_fs.get_quiz_json(args_dict["element_id"], args_dict["topic_id"], args_dict["course_id"]))
+        scores = quiz_mgr.evaluate_answers(self._logged_user, args_dict["answers"])
+        quiz_mgr.add_attempt(self._logged_user, args_dict["answers"], scores)
+        self.course_fs.edit_quiz(args_dict["element_id"], args_dict["topic_id"], args_dict["course_id"], quiz_mgr.get_quiz_dict())
+    
+    def get_user_attempts(self, args_dict):
+        quiz_mgr = QuizManager(self.course_fs.get_quiz_json(args_dict["element_id"], args_dict["topic_id"], args_dict["course_id"]))
+        return quiz_mgr.get_user_attempts(self._logged_user)
 
     def load_lesson_html(self, args_dict):
         element_html = self.course_fs.get_lesson_html(

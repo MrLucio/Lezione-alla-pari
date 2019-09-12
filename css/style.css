@@ -55,3 +55,8 @@
 .row {
     margin: 0;
 }
+
+.table {
+    margin: auto;
+    width: 50% !important;
+}
